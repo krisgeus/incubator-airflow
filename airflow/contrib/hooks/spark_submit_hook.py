@@ -216,14 +216,10 @@ class SparkSubmitHook(BaseHook):
         spark_submit_cmd = self._build_command(application)
         self._sp = subprocess.Popen(spark_submit_cmd,
                                     stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT,
                                     **kwargs)
 
-        # Using two iterators here to support 'real-time' logging
-        sources = [self._sp.stdout, self._sp.stderr]
-
-        for source in sources:
-            self._process_log(iter(source.readline, b''))
+        self._process_log(iter(self._sp.stdout.readline, b''))
 
         output, stderr = self._sp.communicate()
 
